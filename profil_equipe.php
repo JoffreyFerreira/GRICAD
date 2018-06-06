@@ -13,7 +13,7 @@
  					$servername = "localhost";
 					$username = "admin";
 					$password = "admin";
-					$dbname = "hebergement";
+					$dbname = "imag";
 					$equipe = $_POST['equipe'];
 					// Create connection
 					$conn = new mysqli($servername, $username, $password, $dbname);
@@ -32,7 +32,7 @@
 
 					if ($result->num_rows > 0) {
 					    while($row = $result->fetch_assoc()) {
-					        echo "<tr><td>id : ".$row['id_machine']."<td/><td>".$row['nom_baie']."<td/><td>".$row['nom_modele']."<td/><td>".$row['serveur']."<td/><td>".$row['baie']."<td/><td>".$row['reseaux']."<td/><td>".$row['cluster']."<td/><td>".$row['puissance_theorique']."<td/><td>".$row['num_serie']."<td/><td>".$row['nbr_U']."<td/><tr/>";
+					        echo "<tr><td><a href=\"machine.php?id_machine=".$row['id_machine']."\">".$row['id_machine']."</a><td/><td>".$row['nom_baie']."<td/><td>".$row['nom_modele']."<td/><td>".$row['serveur']."<td/><td>".$row['baie']."<td/><td>".$row['reseaux']."<td/><td>".$row['cluster']."<td/><td>".$row['puissance_theorique']."<td/><td>".$row['num_serie']."<td/><td>".$row['nbr_U']."<td/><tr/>";
 					    }
 					echo "<table/>";
 					} else {

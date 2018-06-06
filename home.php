@@ -8,7 +8,7 @@
  	<body>
 
  		<div id="choix">
- 		<form method="post" action="home.php">
+ 		<form method="post" action="profil_baie.php">
 	   		<p>
 		   		<ul>
 		   		<?php 
@@ -28,9 +28,6 @@
 				<li><input type="radio" name="rack" value="annexe">Annexe</li>
 				
 				</ul>
-
-			   	<label for="time">Saisir durée:</label> 
-			   	<input type="text" name="time" id="time" /> Ex : 1m = 1 minute, 2h, 3d...
 				<input type="submit" value="Envoyer" />
 			</p>
 		</form>
@@ -44,7 +41,7 @@
 				$servername = "localhost";
 				$username = "admin";
 				$password = "admin";
-				$dbname = "hebergement";
+				$dbname = "imag";
 
 				// Create connection
 				$conn = new mysqli($servername, $username, $password, $dbname);
@@ -86,6 +83,9 @@
 				<input type="submit" value="Envoyer type">
 			</p>
 		</form>
+		<form>
+			<input type="button" value="Comparaison des types" onclick="window.location.href='comparaison_type.php'" />
+		</form> 
 
 		<p>
  			<?php
@@ -136,9 +136,37 @@
  			?>
  		</p>
  		</div><div id="graph">
- 			<!-- <p>
- 			<iframe src="https://gricad-grafana.u-ga.fr/d/GhFfsLViz/comparatif-consommations-prometheus?panelId=2&orgId=1&from=1527465677762&to=1527508877763" width="1200" height="700" frameborder="0"></iframe>
- 			</p> -->
+ 			<!-- <form action="home.php">
+    			<input type="submit" value="raffraichissement" name="action"/>
+			</form>
+				<?php
+				    if($_SERVER['REQUEST_METHOD'] == "POST" and isset($_POST['action'])){
+				        raffraichissement();
+				    }
+
+				    function raffraichissement(){
+				        //URL construction
+		 				if ($_POST['time'] == '') { $time='1m'; } else { $time=$_POST['time']; }
+		 				$url = 'https://gricad-dc-monitor.u-ga.fr/api/v1/query?query=';
+		 				$query = urlencode('rPDU2DeviceStatusEnergy{rack="'.$_POST['rack'].'"}['.$time.']');
+
+
+		 				//API call
+		 				$res = shell_exec('curl -k '.$url.$query);
+		 				$result = json_decode($res);
+
+
+		 				// If error
+		 				if ($result->{'status'}=='error') {
+		 					echo "QUERY : ".urldecode($query)."<br>ERROR ON QUERY : ".$result->{'error'};
+		 				}
+
+	 				
+		 				//If success
+		 				else{
+		 				}
+				    }
+				?> -->
  		</div>
 	</body>
 </html>
