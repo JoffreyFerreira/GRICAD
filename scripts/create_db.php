@@ -14,13 +14,9 @@ if ($conn->connect_error) {
 }
 
 $sql = "USE imag;";
-if ($conn->query($sql) === TRUE) {
-	echo "Table rattachement_admin created successfully\n";
-} else {
-	echo "Error creating table: " . $conn->error."\n";
-}
+$conn->query($sql);
 
-$table = array('outlet', 'machine', 'baie', 'projet_equipe', 'rattachement_admin');
+$table = array('capacite', 'outlet', 'machine', 'baie', 'projet_equipe', 'rattachement_admin', 'conso_equipe', 'conso_daily', 'conso_weekly');
 
 foreach ($table as $t) {
 	$sql = "DROP TABLE IF EXISTS ".$t;
@@ -51,8 +47,23 @@ primary key (nom_projet),
 foreign key (nom_admin) references rattachement_admin(nom_admin)
 )";
 
+
 if ($conn->query($sql) === TRUE) {
 	echo "Table projet_equipe created successfully\n";
+} else {
+	echo "Error creating table: " . $conn->error . "\n";
+}
+
+// sql to create table projet_equipe
+$sql = "CREATE TABLE conso_equipe(
+nom_projet VARCHAR(30) not null,
+conso_mois_dernier INTEGER,
+conso_mois INTEGER,
+primary key (nom_projet)
+)";
+
+if ($conn->query($sql) === TRUE) {
+	echo "Table conso_equipe created successfully\n";
 } else {
 	echo "Error creating table: " . $conn->error . "\n";
 }
@@ -74,7 +85,7 @@ $sql = "CREATE TABLE machine(
 nom_projet                  VARCHAR(30)     not null,
 id_machine                  INTEGER         not null,
 nom_baie                    VARCHAR(10)     not null,
-nom_modele                  VARCHAR(255)    not null,
+nom_modele                  VARCHAR(255)     not null,
 serveur                     INT             not null,
 stockage                    INT             not null,
 reseaux                     INT             not null,
@@ -94,6 +105,32 @@ if ($conn->query($sql) === TRUE) {
 } else {
 	echo "Error creating table: " . $conn->error . "\n";
 }
+
+
+$sql = "CREATE TABLE capacite(
+	id_machine				INTEGER 		not null,
+	capaciteTo 				INTEGER,
+	primary key (id_machine)
+)";
+
+if ($conn->query($sql) === TRUE) {
+	echo "Table capacite created successfully\n";
+} else {
+	echo "Error creating table: " . $conn->error . "\n";
+}
+
+$sql = "CREATE TABLE ss_categorie(
+	nom_modele				VARCHAR(255) 	not null,
+	nom_ss_categorie 		VARCHAR(255),
+	primary key (nom_modele)
+)";
+
+if ($conn->query($sql) === TRUE) {
+	echo "Table capacite created successfully\n";
+} else {
+	echo "Error creating table: " . $conn->error . "\n";
+}
+
 
 $sql = "CREATE TABLE outlet(
 id 							INTEGER 		not null,
@@ -166,6 +203,13 @@ for ($i=0; $i < count($tab); $i++) {
 			echo "Error: " . $sql . " " . $conn->error . "\n";
 		}
 
+		$sql = "INSERT IGNORE INTO conso_equipe (nom_projet, conso_mois, conso_mois_dernier) VALUES ('$projet', 0, 0)";
+		if ($conn->query($sql) === TRUE) {
+		    // echo "New record created successfully\n";
+		} else {
+			echo "Error: " . $sql . " " . $conn->error . "\n";
+		}
+
 		$sql = "INSERT INTO machine(nom_projet, id_machine, nom_baie, nom_modele, serveur, stockage, reseaux, cluster, aci, nbr_U, puissance_theorique, num_serie, id_U)
 		VALUES('$projet', '$id', '$baie', '$modele', '$type[1]', '$type[2]', '$type[3]', '$type[4]', 0, '$nbr_U', '$puissance_theorique', '$num_serie', '$id_U')";
 		if ($conn->query($sql) === TRUE) {
@@ -174,7 +218,7 @@ for ($i=0; $i < count($tab); $i++) {
 			echo "Error: " . $sql . " " . $conn->error . "\n";
 		}
 
-		$sql = "INSERT IGNORE INTO capacite (id_machine) VALUES('$id')";
+		$sql = "INSERT INTO capacite(id_machine, capaciteTo) VALUES ('$id', 0)";
 		if ($conn->query($sql) === TRUE) {
 				    // echo "New record created successfully\n";
 		} else {
@@ -188,7 +232,6 @@ for ($i=0; $i < count($tab); $i++) {
 			echo "Error: " . $sql . " " . $conn->error . "\n";
 		}
 
-		
 		for ($j=34; $j < 42; $j++) { 
 			$outlet=$tab[$i]->{'data'}->{$j}->{'values'}[0];
 			$pdu = ($j-33)%4 +1;

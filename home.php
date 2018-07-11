@@ -6,10 +6,19 @@
 </head>
 
 <body>
+	<div>
+		<h2>Plateforme de monitoring du DC IMAG - Accueil</h2>
+	</div>
+
+
 
 	<div id="choix">
+
+		<h3>Profil par baie</h3>
+
 		<form method="post" action="profil_baie.php">
 			<p>
+
 				<ul>
 					<?php 
 					$lettre = array('a', 'b', 'c', 'd', 'e', 'f');
@@ -25,19 +34,20 @@
 					}
 					?>
 
-					<li><input type="radio" name="rack" value="annexe">Annexe</li>
+					<li><input type="radio" name="baie" value="annexe">Annexe</li>
 
-				</ul>
+				</ul>	
 				<input type="submit" value="Envoyer" />
 			</p>
 		</form>
 
-		<!-- MENU DEROULANT CHOIX D EQUIPE -->
+		<h3>Profil par équipe</h3>
+
 		<form method="post" action="profil_equipe.php">
 			<p>
 				<label for="equipe">Sélectionnez équipe</label>
 				<?php
-				
+
 				$servername = "localhost";
 				$username = "admin";
 				$password = "admin";
@@ -45,7 +55,7 @@
 
 				// Create connection
 				$conn = new mysqli($servername, $username, $password, $dbname);
-				
+
 				// Check connection
 				if ($conn->connect_error) {
 					die("Connection failed: " . $conn->connect_error);
@@ -65,24 +75,32 @@
 				} else {
 					echo "0 results";
 				}
-				
+
 				$conn->close();
 				?>
+				<br>
 				<input type="submit" value="Envoyer équipe"/>
 			</p>
-		</form>	
+		</form>
+
+		<h3>Profil par type de machine</h3>
+
 		<form method="post" action=profil_type.php>
 			<p>
 				<label for=type>Selectionnez type de machine</label>
 				<select name="type">
 					<option value="serveur">serveur</option>
-					<option value="baie">baie</option>
+					<option value="stockage">stockage</option>
 					<option value="reseaux">reseaux</option>
 					<option value="cluster">cluster</option>
+					<option value="aci">aci</option>
 				</select>
+				<br>
 				<input type="submit" value="Envoyer type">
 			</p>
 		</form>
+
+		<h3>Page de comparaison des types</h3>
 		<form>
 			<input type="button" value="Comparaison des types" onclick="window.location.href='comparaison_type.php'" />
 		</form> 
