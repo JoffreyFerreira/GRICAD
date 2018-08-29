@@ -1,27 +1,48 @@
 #!/usr/bin/php
 <?php
 
-$servername = "localhost";
-$username = "admin";
-$password = "admin";
+include 'ressources.php';
+$conn = init("imag");
+$sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+$port = 47807;
 
 
-// Create connection
-$conn = new mysqli($servername, $username, $password);
+$sql = "SELECT * from baie_hd_equipe natural join projet_equipe natural join conso_equipe natural join mail_equipe;";
+$result = $conn->query($sql);
+$baie_done = array();
 
-// Check connection
-if ($conn->connect_error) {
-	die("Connection failed: " . $conn->connect_error . "\n");
+while ($row = $result->fetch_assoc()) {
+
+	$equipe = $row['nom_projet'];
+	$baie = $row['nom_baie'];
+	$baie_done[] = $baie;
+
+	if (!isset($info[$equipe]['mesure'])) {
+		$info[$equipe]['mesure'] = 0;
+		$info[$equipe]['old_mesure'] = $row['conso_mois'];
+		$info[$equipe]['mail'] = $row['mail'];
+	}
+
+	//URL construction
+	$url = 'https://gricad-dc-monitor.u-ga.fr/api/v1/query?query=';
+
+	$query = "sum(rPDU2DeviceStatusEnergy{rack=\"" . $baie . "\"})";
+	$res_api = shell_exec('curl -k -s '.$url.urlencode($query));
+	$result_decode = json_decode($res_api);
+
+	// If error
+	if ($result_decode->{'status'}=='error') {
+		echo "QUERY : ".urldecode($query)." ERROR ON QUERY : ".var_dump($result_decode);
+	}
+
+	//If success
+	$info[$equipe]['mesure'] += intval($result_decode->{'data'}->{'result'}[0]->{'value'}[1]);
 }
 
-$sql = "USE imag;";
-$conn->query($sql);
-
 // Get outlet / machine / equipe
-$sql = "SELECT * from outlet natural join machine natural join projet_equipe natural join conso_equipe;";
+$sql = "SELECT * from outlet natural join machine natural join projet_equipe natural join conso_equipe natural join mail_equipe;";
 $result = $conn->query($sql);
-$mesure = array();
-$old_mesure = array();
+$info = array();
 
 while ($row = $result->fetch_assoc()) {
 
@@ -29,27 +50,36 @@ while ($row = $result->fetch_assoc()) {
 	$outlet = $row['id_outlet'];
 	$pdu = $row['id_PDU'];
 	$baie = $row['nom_baie'];
+	
+	if (!in_array($baie, $baie_done)) {
 
-	if (!isset($mesure[$equipe])) {
-		$mesure[$equipe] = 0;
-		$old_mesure[$equipe] = $row['conso_mois'];
-	}
-
-	$mesure[$equipe] = query_gen_month($outlet, $pdu, $baie, $mesure[$equipe]);
+		if (!isset($info[$equipe]['mesure'])) {
+			$info[$equipe]['mesure'] = 0;
+			$info[$equipe]['old_mesure'] = $row['conso_mois'];
+			$info[$equipe]['mail'] = $row['mail'];
+		}
+		$info[$equipe]['mesure'] = query_gen_month($outlet, $pdu, $baie, $info[$equipe]['mesure']);
+	}	
 }
 
-foreach ($mesure as $equipe => $value) {
-	$sql = "UPDATE conso_equipe SET conso_mois_dernier=".$old_mesure[$equipe].", conso_mois=".$mesure[$equipe]." where nom_projet=\"".$equipe."\"";
+foreach ($info as $equipe => $value) {
+	$sql = "UPDATE conso_equipe SET conso_mois_dernier=".$value['old_mesure'].", conso_mois=".$value['mesure']." where nom_projet=\"".$equipe."\"";
 
 	if ($conn->query($sql) === TRUE) {
-	// echo "New record created successfully\n";
+		$msg = $equipe. ";" .strval($value['mesure']-$value['old_mesure']). ";" .$value['mail'];
+		$len = strlen($msg);
+		socket_sendto($sock, $msg, $len, 0, '127.0.0.1', $port);
+		//ajouter nombre de U
 	} 
 	else {
 		echo "Error: " . $sql . " " . $conn->error . "\n";
 	}
 }
 
+
+
 $conn->close(); 
+socket_close($sock);
 
 function query_gen_month($outlet, $pdu, $baie, $tab){
 
@@ -60,12 +90,12 @@ function query_gen_month($outlet, $pdu, $baie, $tab){
 	$res_api = shell_exec('curl -k -s '.$url.urlencode($query));
 	$result_decode = json_decode($res_api);
 
-		// If error
+	// If error
 	if ($result_decode->{'status'}=='error') {
 		echo "QUERY : ".urldecode($query)." ERROR ON QUERY : ".var_dump($result_decode);
 	}
 
-		//If success
+	//If success
 	$tab += intval($result_decode->{'data'}->{'result'}[0]->{'value'}[1]); 
 
 	return $tab;

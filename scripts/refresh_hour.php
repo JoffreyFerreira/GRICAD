@@ -1,23 +1,10 @@
 #!/usr/bin/php
 <?php
 
-$servername = "localhost";
-$username = "admin";
-$password = "admin";
+include 'ressources.php';
+$conn = init("imag");
 
-
-$nbr_hour = 25;
-
-// Create connection
-$conn = new mysqli($servername, $username, $password);
-
-// Check connection
-if ($conn->connect_error) {
-	die("Connection failed: " . $conn->connect_error . "\n");
-}
-
-$sql = "USE imag;";
-$conn->query($sql);
+$n = 24;
 
 $table = array("conso_daily", "temperature", "humidity");
 
@@ -36,7 +23,7 @@ $sql_humidite1="CREATE TABLE humidity(nom_baie VARCHAR(10) not null,";
 $sql_temp_2="";
 $sql_humidite2="";
 
-for ($i=0; $i < 24; $i++) { 
+for ($i=0; $i < $n; $i++) { 
 	$sql .= "value".$i." INTEGER,";
 	$sql_temp .= "temp_bas".$i." FLOAT, ";
 	$sql_temp_2 .= "temp_haut".$i." FLOAT, ";
@@ -50,7 +37,6 @@ if ($conn->query($sql) === TRUE) {
 } else {
 	echo "Error creating table: " . $conn->error . "\n";
 }
-
 
 if ($conn->query($sql_temp.$sql_temp_2."primary key (nom_baie))") === TRUE) {
 	echo "Table temperature created successfully\n";
@@ -77,19 +63,19 @@ while ($row = $result->fetch_assoc()) {
 	$baie = $row['nom_baie'];
 
 	if (!isset($mesure[$id_machine])) {
-		$mesure[$id_machine] = array_fill(1, 25, 0);
+		$mesure[$id_machine] = array_fill(1, $n+1, 0);
 	}
 
-	$mesure[$id_machine] = query_gen_hour($outlet, $pdu, $baie, $mesure[$id_machine]);
+	$mesure[$id_machine] = queryGen($outlet, $pdu, $baie, $mesure[$id_machine], "h", "rPDU2OutletMeteredStatusPower");
 }
 
 foreach ($mesure as $id_machine => $value) {
 	$sql = "INSERT INTO conso_daily VALUES (".$id_machine.", ";
 
-	for ($k=1; $k < 24; $k++) { 
+	for ($k=1; $k < $n; $k++) { 
 		$sql .= $mesure[$id_machine][$k].", ";
 	}
-	$sql .= $mesure[$id_machine][24].") ";
+	$sql .= $mesure[$id_machine][$n].") ";
 
 	if ($conn->query($sql) === TRUE) {
 	// echo "New record created successfully\n";
@@ -104,7 +90,7 @@ $result = $conn->query($sql);
 $temp = array();
 while ($row = $result->fetch_assoc()) {
 
-	$query = array("bas" => array_fill(1, 24, 0), "haut" => array_fill(1, 24, 0), "humidite_1" => array_fill(1, 24, 0), "humidite_2" => array_fill(1, 24, 0)); 
+	$query = array("bas" => array_fill(1, $n, 0), "haut" => array_fill(1, $n, 0), "humidite_1" => array_fill(1, $n, 0), "humidite_2" => array_fill(1, $n, 0)); 
 	$baie = $row['nom_baie'];
 	$alley = substr($baie, 0, 1);
 	$rack = intval(substr($baie, 1, 1));
@@ -112,31 +98,31 @@ while ($row = $result->fetch_assoc()) {
 	if ($alley!="e" && $baie!="a4") {
 		
 		if ($rack==5 && $alley!="a") {
-			$query["bas"] = query_gen_temp("1", $baie, $query["bas"]);
-			$query["haut"] = query_gen_temp("2", $baie, $query["haut"]);
+			$query["bas"] = queryGen(NULL, "1", $baie, $query["bas"], "h", "rPDU2SensorTempHumidityStatusTempC");
+			$query["haut"] = queryGen(NULL, "2", $baie, $query["haut"], "h", "rPDU2SensorTempHumidityStatusTempC");
 		} elseif ($rack==6 && $alley!="a") {
-			$query["bas"] = query_gen_temp("3", $alley."5", $query["bas"]);
-			$query["haut"] = query_gen_temp("4", $alley."5", $query["haut"]);	
+			$query["bas"] = queryGen(NULL, "3", $alley."5", $query["bas"], "h", "rPDU2SensorTempHumidityStatusTempC");
+			$query["haut"] = queryGen(NULL, "4", $alley."5", $query["haut"], "h", "rPDU2SensorTempHumidityStatusTempC");	
 		} else {
-			$query["bas"] = query_gen_temp("3", $baie, $query["bas"]);	
-			$query["haut"] = query_gen_temp("4", $baie, $query["haut"]);
+			$query["bas"] = queryGen(NULL, "3", $baie, $query["bas"], "h", "rPDU2SensorTempHumidityStatusTempC");	
+			$query["haut"] = queryGen(NULL, "4", $baie, $query["haut"], "h", "rPDU2SensorTempHumidityStatusTempC");
 		}
 
 		if ($rack==1 || $rack==4 || $rack== 7) {
-			$query['humidite_1'] = query_gen_humidity("1", $baie, $query['humidite_1']);
+			
+			$query['humidite_1'] = queryGen(NULL, "1", $baie, $query['humidite_1'], "h", "rPDU2SensorTempHumidityStatusRelativeHumidity");
+			
 			if ($baie == "a7" || $baie == "f1") {
-				$query['humidite_2'] = query_gen_humidity("2", $baie, $query['humidite_2']);
-
+			
+				$query['humidite_2'] = queryGen(NULL, "2", $baie, $query['humidite_2'], "h", "rPDU2SensorTempHumidityStatusRelativeHumidity");
 				$sql_humidite1 = "INSERT INTO humidity VALUES ('$baie', ";
 				$sql_humidite2="";
-
-				for ($k=1; $k < 24; $k++) { 
+				for ($k=1; $k < $n; $k++) { 
 					$sql_humidite1 .= $query['humidite_1'][$k].", ";
 					$sql_humidite2 .= $query['humidite_2'][$k].", ";
 				}
-
-				$sql_humidite1 .= $query['humidite_1'][24].", ";
-				$sql_humidite2 .= $query['humidite_2'][24].") ";
+				$sql_humidite1 .= $query['humidite_1'][$n].", ";
+				$sql_humidite2 .= $query['humidite_2'][$n].") ";
 
 				if ($conn->query($sql_humidite1.$sql_humidite2) === TRUE) {
 					// echo "New record created successfully\n";
@@ -148,13 +134,11 @@ while ($row = $result->fetch_assoc()) {
 
 				$sql_humidite1 = "INSERT INTO humidity VALUES ('$baie', ";
 				$sql_humidite2="";
-
-				for ($k=1; $k < 24; $k++) { 
+				for ($k=1; $k < $n; $k++) { 
 					$sql_humidite1 .= $query['humidite_1'][$k].", ";
 					$sql_humidite2 .= "0, ";
 				}
-
-				$sql_humidite1 .= $query['humidite_1'][24].", ";
+				$sql_humidite1 .= $query['humidite_1'][$n].", ";
 				$sql_humidite2 .= "0) ";
 
 				if ($conn->query($sql_humidite1.$sql_humidite2) === TRUE) {
@@ -162,20 +146,18 @@ while ($row = $result->fetch_assoc()) {
 				} else {
 					echo "Error: " . $sql_humidite1.$sql_humidite2 . " " . $conn->error . "\n";
 				}
+			
 			}
 		}
 
 		$sql_temp = "INSERT INTO temperature VALUES ('$baie', ";
 		$sql_temp_2 ="";
-
-		for ($k=1; $k < 24; $k++) { 
+		for ($k=1; $k < $n; $k++) { 
 			$sql_temp .= $query['bas'][$k].", ";
 			$sql_temp_2 .= $query['haut'][$k].", ";
-
 		}
-
-		$sql_temp .= $query['bas'][24].", ";
-		$sql_temp_2 .= $query['haut'][24].") ";
+		$sql_temp .= $query['bas'][$n].", ";
+		$sql_temp_2 .= $query['haut'][$n].") ";
 		
 
 		if ($conn->query($sql_temp.$sql_temp_2) === TRUE) {
@@ -183,87 +165,8 @@ while ($row = $result->fetch_assoc()) {
 		} else {
 			echo "Error: " . $sql_temp . $sql_temp_2 . " " . $conn->error . "\n";
 		}
-	}
-	
-}
 
+	}	
+}
 $conn->close(); 
-
-function query_gen_temp($pdu, $baie, $tab){
-
-	//URL construction
-	$url = 'https://gricad-dc-monitor.u-ga.fr/api/v1/query?query=';
-
-	for ($i=1; $i < 25; $i++) { 
-
-		$query = "avg_over_time(rPDU2SensorTempHumidityStatusTempC{instance=\"imag-dc-pdu-".$baie."-".$pdu.".u-ga.fr\"}[1h] offset ".$i."h)";
-		$res_api = shell_exec('curl -k -s '.$url.urlencode($query));
-		$result_decode = json_decode($res_api);
-
-		// If error
-		if ($result_decode->{'status'}=='error') {
-			echo "QUERY : ".urldecode($query)." ERROR ON QUERY : ".var_dump($result_decode);
-		}
-
-		//If success
-		else{
-			if(!empty($result_decode->{'data'}->{'result'})){
-				$tab[$i] = floatval($result_decode->{'data'}->{'result'}[0]->{'value'}[1])/10; 
-			}
-		}
-	}
-	return $tab;
-}
-
-function query_gen_humidity($pdu, $baie, $tab){
-
-	//URL construction
-	$url = 'https://gricad-dc-monitor.u-ga.fr/api/v1/query?query=';
-
-	for ($i=1; $i < 25; $i++) { 
-
-		$query = "avg_over_time(rPDU2SensorTempHumidityStatusRelativeHumidity{instance=\"imag-dc-pdu-".$baie."-".$pdu.".u-ga.fr\"}[1h] offset ".$i."h)";
-		$res_api = shell_exec('curl -k -s '.$url.urlencode($query));
-		$result_decode = json_decode($res_api);
-
-		// If error
-		if ($result_decode->{'status'}=='error') {
-			echo "QUERY : ".urldecode($query)." ERROR ON QUERY : ".var_dump($result_decode);
-		}
-
-		//If success
-		else{
-			if(!empty($result_decode->{'data'}->{'result'})){
-				$tab[$i] = floatval($result_decode->{'data'}->{'result'}[0]->{'value'}[1]); 
-			}
-		}
-	}
-	return $tab;
-}
-
-function query_gen_hour($outlet, $pdu, $baie, $tab){
-
-	//URL construction
-	$url = 'https://gricad-dc-monitor.u-ga.fr/api/v1/query?query=';
-
-	for ($i=1; $i < 25; $i++) { 
-
-		$query = "avg_over_time(rPDU2OutletMeteredStatusPower{instance=\"imag-dc-pdu-".$baie."-".$pdu.".u-ga.fr\", rPDU2OutletMeteredStatusIndex=\"".$outlet."\"}[1h] offset ".$i."h)";
-		$res_api = shell_exec('curl -k -s '.$url.urlencode($query));
-		$result_decode = json_decode($res_api);
-
-		// If error
-		if ($result_decode->{'status'}=='error') {
-			echo "QUERY : ".urldecode($query)." ERROR ON QUERY : ".var_dump($result_decode);
-		}
-
-		//If success
-		else{
-			if(!empty($result_decode->{'data'}->{'result'})){
-				$tab[$i] += floatval($result_decode->{'data'}->{'result'}[0]->{'value'}[1]); 				
-			}
-		}
-	}
-	return $tab;
-}
 ?>

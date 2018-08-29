@@ -2,16 +2,13 @@
 #####################################################################################################
 #                               traitement_csv_imag                                                 
 #                               
-#                               Paramters : Two csv files : one input and one output                  
-#                               
-#                               Sortie : (re)initialise hebergement db                                                 
+#                               Paramters : tsv file with informations to put in bdd                                                
 #####################################################################################################
 #####################################################################################################
 
 use DBI;
 
 my $filename = $ARGV[0];
-my $outputName = $ARGV[1];
 
 my $serveur = 'localhost'; 
 my $identifiant = 'admin';
@@ -23,9 +20,7 @@ my $db = 'imag';
 if(not defined $filename){
 	die "Besoin du fichier d'entrée";
 }
-if(not defined $outputName){
-	die "Besoin du fichier de sortie";
-}
+
 
 # Connection à la bdd
 my $dbh = DBI->connect( "DBI:mysql:database=$bd;host=$serveur;port=$port", 
@@ -38,8 +33,6 @@ $dbh->do('use imag;');
 
 # Ouverture fichier d'entrée / sortie
 open(my $file, '<', $filename) || die ("Erreur lors de l'ouverture du fichier $filename");
-open(my $output, '>', $outputName) || die ("Erreur lors de l'ouverture du fichier $outputName");
-
 
 
 # Preparation de les requete d insertion
@@ -95,7 +88,6 @@ my $id_machine = 200;
 while ( my $ligne = <$file> ) {
     if ($id_machine>=201) {
         chomp $ligne;
-        $ligne = lc($ligne);
         my @l = split /\t/, $ligne;
         my @outlet = get_outlet(@l);
         my @type = get_type(@l);
@@ -128,7 +120,7 @@ sub get_outlet {
     my @output;
 
     for (my $i = 13; $i < 4*30; $i++) {
-        if (@l[$i] eq "x") {
+        if (@l[$i] eq "X") {
             my $outlet_id = ($i-13)%30+1;
             my $pdu_id = int(($i-13)/30)+1;
             $output[$compt] = "$pdu_id\t$outlet_id";
@@ -143,7 +135,7 @@ sub get_type {
     my (@l) = @_;
     my @output; 
     for (my $i = 2; $i < 7; $i++) {
-        if ($l[$i] eq "x") {
+        if ($l[$i] eq "X") {
 
             $output[$i] = 1;
             } else {

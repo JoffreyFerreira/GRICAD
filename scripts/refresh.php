@@ -1,24 +1,9 @@
 #!/usr/bin/php
 <?php
 
-$servername = "localhost";
-$username = "admin";
-$password = "admin";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password);
-
-// Check connection
-if ($conn->connect_error) {
-	die("Connection failed: " . $conn->connect_error . "\n");
-}
-
-$sql = "USE imag;";
-if ($conn->query($sql) === TRUE) {
-	echo "Table rattachement_admin created successfully\n";
-} else {
-	echo "Error creating table: " . $conn->error."\n";
-}
+$dc = "imag";
+include 'ressources.php';
+$conn = init($dc);
 
 $table = array('outlet', 'machine', 'baie', 'projet_equipe', 'rattachement_admin');
 
@@ -111,7 +96,7 @@ if ($conn->query($sql) === TRUE) {
 }
 
 // API call
-$res = shell_exec("curl -H 'https://gricad.univ-grenoble-alpes.fr/export_soumissions/webform/07264df1-aacc-4b3a-bcaa-fe462fc6d05a/submission's   ");
+$res = shell_exec("curl -H \"api-key: xxx\" 'https://gricad.univ-grenoble-alpes.fr/export_soumissions/webform/07264df1-aacc-4b3a-bcaa-fe462fc6d05a/submission's   ");
 $tab = json_decode($res);
 
 
@@ -188,8 +173,25 @@ for ($i=0; $i < count($tab); $i++) {
 			echo "Error: " . $sql . " " . $conn->error . "\n";
 		}
 
+		$sql = "INSERT IGNORE INTO conso_equipe(nom_projet) VALUES ('$projet')";
+		if ($conn->query($sql) === TRUE) {
+				    // echo "New record created successfully\n";
+		} else {
+			echo "Error: " . $sql . " " . $conn->error . "\n";
+		}
+
+		$sql = "INSERT IGNORE INTO mail_equipe(nom_projet) VALUES ('$projet')";
+		if ($conn->query($sql) === TRUE) {
+				    // echo "New record created successfully\n";
+		} else {
+			echo "Error: " . $sql . " " . $conn->error . "\n";
+		}
+
 		
 		for ($j=34; $j < 42; $j++) { 
+			if (is_object($tab[$i]->{'data'}->{$j}->{'values'})) {
+				$tab[$i]->{'data'}->{$j}->{'values'} = get_object_vars($tab[$i]->{'data'}->{$j}->{'values'});
+			}
 			$outlet=$tab[$i]->{'data'}->{$j}->{'values'}[0];
 			$pdu = ($j-33)%4 +1;
 			if($outlet!=""){

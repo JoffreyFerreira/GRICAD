@@ -1,16 +1,8 @@
 <?php
-$servername = "localhost";
-$username = "admin";
-$password = "admin";
-$dbname = "imag";
-$equipe = $_POST['equipe'];
-					// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+include 'scripts/ressources.php';
+$conn = init("imag");
 
-					// Check connection
-if ($conn->connect_error) {
-	die("Connection failed: " . $conn->connect_error);
-}
+$equipe = $_POST['equipe'];
 
 // requete pour liste machine
 $sql = "select distinct * from machine natural join capacite natural join ss_categorie where nom_projet=\"".$equipe."\";";
@@ -83,7 +75,11 @@ $conso_mois = intval($row['conso_mois'])-intval($row['conso_mois_dernier']);
 <head>
 	<title>Profil équipe</title>
 	<link rel="stylesheet" type="text/css" href="style/style.css">
-	<script>
+	
+	<script src="canvasjs/canvasjs.min.js"></script>
+	<script src="graphe.js" type="text/javascript"></script>
+	
+	<script type="text/javascript">
 
 		window.onerror = function(msg, url, linenumber) {
 			alert('Error message: '+msg+'\nURL: '+url+'\nLine Number: '+linenumber);
@@ -92,72 +88,19 @@ $conso_mois = intval($row['conso_mois'])-intval($row['conso_mois_dernier']);
 
 		window.onload = function () {
 
-			var tab = <?php echo json_encode($valeur_h, JSON_NUMERIC_CHECK); ?>;
-			var tab_w = <?php echo json_encode($valeur_w, JSON_NUMERIC_CHECK); ?>;
-			var data_list = [];
-			var data_list_w = [];
-
-			console.log(tab);
-
-			for (id in tab) {
-				data_list.push({					
-					toolTipContent : "id : "+id+", y: {y} ",
-					type: "line",
-					name: String(id),
-					indexLabel: "{y}",
-					yValueFormatString: "#0.##",
-					showInLegend: true,
-					dataPoints: tab[id]
-				});
-			}
-
-			var chart_h = new CanvasJS.Chart("chartContainer_h", {
-				animationEnabled: true,
-				theme: "light2",
-				axisY:{
-					minimum: 50,
-				},
-				legend:{
-					cursor: "pointer",
-					verticalAlign: "center",
-					horizontalAlign: "right",
-				},
-				data : data_list
-			});
-
-
-
-			for (id in tab_w) {
-				data_list_w.push({
-					toolTipContent : "id : "+id+", y: {y} ",
-					type: "line",
-					name: String(id),
-					indexLabel: "{y}",
-					yValueFormatString: "#0.##",
-					showInLegend: true,
-					dataPoints: tab_w[id]
-				});
-			}			
-
-			var chart_w = new CanvasJS.Chart("chartContainer_w", {
-				animationEnabled: true,
-				theme: "light2",
-				axisY:{
-					minimum: 50,
-				},
-				legend:{
-					cursor: "pointer",
-					verticalAlign: "center",
-					horizontalAlign: "right",
-				},
-				data : data_list_w
-			});
-
+			var chart_h = genGraph(<?php echo json_encode($valeur_h, JSON_NUMERIC_CHECK); ?>, 50, "W", "Heures");
+			console.log(chart_h);
+			chart_h = new CanvasJS.Chart("chartContainer_h", chart_h);
 			chart_h.render();
+
+			var chart_w = genGraph(<?php echo json_encode($valeur_w, JSON_NUMERIC_CHECK); ?>, 50, "W", "Semaines");
+			chart_w = new CanvasJS.Chart("chartContainer_w", chart_w);
 			chart_w.render();
 
 		}
+
 	</script>
+
 </head>
 
 <body>
@@ -184,7 +127,6 @@ $conso_mois = intval($row['conso_mois'])-intval($row['conso_mois_dernier']);
 	
 	<h2>Puissance moyenne horaire</h2>
 	<div id="chartContainer_h" style="width: 90%; height: 450px;display: inline-block;"></div>
-	<script src="canvasjs/canvasjs.min.js"></script>
 
 	<h2>Moyenne et écart type</h2>
 	
@@ -192,7 +134,9 @@ $conso_mois = intval($row['conso_mois'])-intval($row['conso_mois_dernier']);
 		<?php
 		echo "<table><tr><td>ID U</td><td>Moyenne</td><td>Ecart type</td></tr>";
 		foreach ($moyenne_h as $t => $value) {
-			echo "<tr><td>".$t."</td><td>".$value."</td><td>".sqrt($ecart_type_h[$t])."</td></tr>";
+			if($value!=0){
+				echo "<tr><td>".$t."</td><td>".strval(floor(10*$value)/10)."</td><td>". strval(floor(10*sqrt($ecart_type_h[$t]))/10)."</td></tr>";
+			}
 		}
 		echo "</table>";
 		?>
@@ -202,7 +146,6 @@ $conso_mois = intval($row['conso_mois'])-intval($row['conso_mois_dernier']);
 
 		<h2>Puissance moyenne hebdomadaire</h2>
 		<div id="chartContainer_w" style="width: 90%; height: 450px;display: inline-block;"></div>
-		<script src="canvasjs/canvasjs.min.js"></script>
 
 	</div>
 
@@ -212,7 +155,9 @@ $conso_mois = intval($row['conso_mois'])-intval($row['conso_mois_dernier']);
 		<?php
 		echo "<table><tr><td>ID U</td><td>Moyenne</td><td>Ecart type</td></tr>";
 		foreach ($moyenne_w as $t => $value) {
-			echo "<tr><td>".$t."</td><td>".$value."</td><td>".sqrt($ecart_type_w[$t])."</td></tr>";
+			if($value!=0){
+				echo "<tr><td>".$t."</td><td>".strval(floor(10*$value)/10)."</td><td>". strval(floor(10*sqrt($ecart_type_w[$t]))/10)."</td></tr>";
+			}
 		}
 		echo "</table>";
 		?>

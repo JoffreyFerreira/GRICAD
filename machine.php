@@ -1,24 +1,13 @@
 <?php
 
-$servername = "localhost";
-$username = "admin";
-$password = "admin";
-$dbname = "imag";
+include 'scripts/ressources.php';
+$conn = init("imag");
+
 $id = $_GET['id_machine'];
 $page = "machine.php?id_machine=".$id;
 
-					// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-					// Check connection
-if ($conn->connect_error) {
-	die("Connection failed: " . $conn->connect_error);
-}
-
-
 $sql = "SELECT * from machine natural join capacite natural join ss_categorie where id_machine=".$id.";";
 $result = $conn->query($sql);
-			// var_dump($result);
 
 if ($result->num_rows > 0) {
 
@@ -48,60 +37,68 @@ if ($result->num_rows > 0) {
 
 	$valeur_h = array();
 	$valeur_w = array();
-	for ($i=0; $i < 24; $i++) { 
-		$valeur_h[] = array("label" => $i, "y" => $row_h["value".$i]);
-		if ($i<12) {
-			$valeur_w[] = array("label" => $i, "y" => $row_w["value".$i]);
+
+	for ($i=0; $i < 24; $i++){
+		$valeur_h[$i] = array("label" => $i, "y" => $row_h["value".(23-$i)]);
+		if ($i<12){
+			$valeur_w[$i] = array("label" => $i, "y" => $row_w["value".(11-$i)]);
 		}
 	}
 
 	?>
+
 	<html>
 	<head>
 		<title>Détail machine</title>
 		<link rel="stylesheet" type="text/css" href="style/style.css">
+		<script src="canvasjs/canvasjs.min.js"></script>
+
+		<script src="graphe.js" type="text/javascript"></script>
+
 		<script type="text/javascript">
+
+			window.onerror = function(msg, url, linenumber) {
+				alert('Error message: '+msg+'\nURL: '+url+'\nLine Number: '+linenumber);
+				return true;
+			}
+
 			window.onload = function () {
 
-				var chart_h = new CanvasJS.Chart("chartContainer_h", {
-					animationEnabled: true,
-					theme: "light2",
-					legend:{
-						cursor: "pointer",
-						verticalAlign: "center",
-						horizontalAlign: "right",
+				var chart_h = new CanvasJS.Chart("chartContainer_h",{
+					
+					axisY:{
+						minimum: 50,
+						title: "W/U",
 					},
-					data: [{
-						type: "line",
-						name: "Moyenne horaire",
-						indexLabel: "{y}",
-						yValueFormatString: "#0.##",
-						showInLegend: true,
-						dataPoints: <?php echo json_encode($valeur_h, JSON_NUMERIC_CHECK); ?>
-					}]
-				});
-
-				var chart_w = new CanvasJS.Chart("chartContainer_w", {
-					animationEnabled: true,
-					theme: "light2",
-					legend:{
-						cursor: "pointer",
-						verticalAlign: "center",
-						horizontalAlign: "right",
+					axisX:{
+						title: "Heures",
 					},
-					data: [{
+					theme: "light2",
+					
+					data:[{
 						type: "line",
-						name: "Moyenne hebdomadaire",
-						indexLabel: "{y}",
-						yValueFormatString: "#0.##",
-						showInLegend: true,
-						dataPoints: <?php echo json_encode($valeur_w, JSON_NUMERIC_CHECK); ?>
+						dataPoints: <?php echo json_encode($valeur_h, JSON_NUMERIC_CHECK); ?> 
 					}]
 				});
 
 				chart_h.render();
-				chart_w.render();
 
+				var chart_w = new CanvasJS.Chart("chartContainer_w",{
+					axisY:{
+						minimum: 50,
+						title: "W/U",
+					},
+					axisX:{
+						title: "Semaines",
+					},
+					theme: "light2",
+					data:[{
+						type: "line",
+						dataPoints: <?php echo json_encode($valeur_w, JSON_NUMERIC_CHECK); ?> 
+					}]
+				});
+
+				chart_w.render();
 			}
 
 		</script>
@@ -128,27 +125,15 @@ if ($result->num_rows > 0) {
 			echo "0 results";
 		}
 
-		function string_to_id_U($id_U){
-			$len=strlen($id_U);
-			if($len==3 || $len==7){
-				return substr($id_U, 1, 2);
-			}
-			else{
-				return substr($id_U, 1, 1);
-			}
-		}
-
 		?>
 
 	</div>
 
 	<h2>Puissance moyenne horaire</h2>
 	<div id="chartContainer_h" style="width: 90%; height: 450px;display: inline-block;"></div>
-	<script src="canvasjs/canvasjs.min.js"></script>
 
 	<h2>Puissance moyenne hebdomadaire</h2>
 	<div id="chartContainer_w" style="width: 90%; height: 450px;display: inline-block;"></div>
-	<script src="canvasjs/canvasjs.min.js"></script>
 
 	<form method="post" action=<?php echo $page;?>>
 		<p>
@@ -180,9 +165,9 @@ if ($result->num_rows > 0) {
 				foreach ($ss_categorie as $value) {
 					echo "<option value=\"$value\">$value</option>";
 				}
-				
+
 				echo "</select><input type=\"submit\" value=\"Modifier sous catégorie\"/>";
-				
+
 				if (isset($_POST['ss_categorie'])) {
 					echo "Sous catégorie mis à jour";
 					$sql = "UPDATE ss_categorie SET nom_ss_categorie=\"".$_POST['ss_categorie']."\" where nom_modele=\"".$info['nom_modele']."\"";

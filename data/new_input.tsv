@@ -1,0 +1,86 @@
+Rattachement administratif	Projet-equipe	serveur	stockage	aci	cluster	reseaux	baie	modele	numero de serie	nombre u	id u	puissance totale	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30
+UGA	reseauUGA			X			a1	inconnu	Imag-bb	1	U16	0									X																																																												X																																																			
+UGA	reseauUGA			X			a1	Juniper SRX-1200	Imag-fw	1	U15	0																																											X																																																												X																	
+UGA	reseauUGA			X			a1	switch	Imag-ltp-desserte-sw1	1	U11	0															X																																																												X																																													
+UGA	reseauUGA			X			a1	switch	Imag-ltp-desserte-sw2	1	U9	0																																															X																																																												X													
+UGA	reseauUGA			X			a1	autre	spring-dc3-fw	1	U7	0																	X																																																												X																																											
+UGA	reseauUGA			X			a2	Graveur DVD-ROM KIKvision		2	U21-U22	0																																																													X																																																											
+UGA	reseauUGA	X		X			a2	SuperMicro		5	U16-U20	0																																					X																																																																																			
+UGA	reseauUGA			X			a2	switch	Imag-rg-a-sw	1	U14	0																	X																																																																																																							
+UGA	reseauUGA			X			a2	switch	Imag-rg-a-sw	1	U12	0															X																																																																																																									
+UGA	reseauUGA			X			a2	switch	Imag-rg-a-sw	1	U10	0																																															X																																																																									
+UGA	reseauUGA			X			a2	switch	Imag-rg-a-sw	1	U8	0																																													X																																																																											
+UGA	reseauUGA		X	X			a3	synologie		1	U21	0																																																																													X																																											
+UGA	reseauUGA	X		X			a3	IBM		1	U20	0																																											X																																																																													
+UGA	reseauUGA	X		X			a3	IBM		1	U19	0																																																																						X																																																		
+UGA	reseauUGA			X			a3	switch APC		1	U17	0																																																																																	X																																							
+UGA	reseauUGA			X			a3	switch APC		1	U15	0																																																																																		X																																						
+UGA	reseauUGA			X			a3	switch APC		1	U13	0																																																																																			X																																					
+UGA	reseauUGA			X			a3	switch APC		1	U11	0																																																																																																														X										
+UGA	reseauUGA			X			a3	switch APC		1	U9	0																																																																																																															X									
+UGA	reseauUGA			X			a3	switch APC		1	U7	0																																																																																																																X								
+UGA	reseauUGA			X			a3	switch APC		1	U5	0																																																																																																																	X							
+UGA	reseauUGA			X			a4	switch	LEAF 312	1	U42	0																																																																																											X																													
+UGA	reseauUGA			X			a4	switch 	imag-dc-312-sw	1	U41	0																																																													X																																																											
+UGA	GRICAD				X		a4	CT OpenStack	CTRL openstack-01	1	U40	0																																																																																												X																												
+UGA	GRICAD				X		a4	CT OpenStack	CTRL openstack-02	1	U39	0																																																																																													X																											
+UGA	GRICAD				X		a4	CT OpenStack	CTRL openstack-03	1	U38	0																																																																																														X																										
+UGA	GRICAD				X		a4	CT OpenStack	Openstack-c-01	1	U37	0																																																																																															X																									
+UGA	GRICAD				X		a4	CT OpenStack	Openstack-c-02	1	U36	0																																																																																																X																								
+UGA	GRICAD				X		a4	CT OpenStack	Ceph-s-03	1	U20	0																																																																																																				X																				
+UGA	GRICAD				X		a4	CT OpenStack	Ceph-s-02	1	U19	0																																																																																																					X																			
+UGA	GRICAD				X		a4	CT OpenStack	Ceph-s-01	1	U18	0																																																																																																						X																		
+UGA	GRICAD				X		a4	CT OpenStack	Ceph-03	1	U17	0																																																																																																							X																	
+UGA	GRICAD				X		a4	CT OpenStack	Ceph-02	1	U16	0																																																																																																								X																
+UGA	GRICAD				X		a4	CT OpenStack	Ceph-01	1	U15	0																																																																																																									X															
+UGA	reseauUGA			X			a4	catalyst cisco	R-campus.imag.fr	1	U5	0																								X																																																																																										X						
+UGA	reseauUGA			X			a5	autre	Leaf 313	1	U42	0																																X																																	X																																																							
+UGA	reseauUGA			X			a5	autre	imag-dc-313-sw	1	U40	0		X																																																																																													X																									
+UGA	reseauUGA			X			a5	APIC 30		1	U39	0	X																																																												X																																																											
+UGA	reseauUGA			X			a5	VPN ASA5520		1	U38	0																																																																																														X																										
+UGA	VERIMAG					X	a6	KVM Dell		1	U27	0																																			X																																																												X																									
+UGA	VERIMAG					X	a6	KVM Dell		1	U20	0																																																																					X																																																			
+UGA	reseauUGA			X			a7	LEAF 314		1	U42	0				X																																																									X																																																											
+UGA	reseauUGA			X			a7	autre	imag-dc-314-sw	1	U40	0					X																																																																																						X																													
+INP	SIMAP					X	a7	cisco	minatec-c3750-l23-1	1	U39	0																																																														X																																																										
+UGA	reseauUGA			X			b1	autre	LEAF 321	1	U42	0	X																																																												X																																																											
+UGA	reseauUGA			X			b1	switch	imag-dc-321-sw	1	U40	0																															X																																																												X																													
+UGA	reseauUGA			X			b3	autre	LEAF 322	1	U42	0																															X																														X																																																											
+UGA	reseauUGA			X			b3	switch	imag-dc-322-sw	1	U40	0	X																																																																																										X																													
+UGA	reseauUGA			X			b5	autre	LEAF 323	1	U42	0																															X																																																												X																													
+UGA	reseauUGA			X			b5	switch	imag-dc-323-sw	1	U40	0	X																																																												X																																																											
+UGA	reseauUGA			X			c1	autre	LEAF 331	1	U42	0		X																																																																																													X																									
+UGA	reseauUGA			X			c1	switch	imag-dc-331-swLEAF	1	U40	0	X																																																												X																																																											
+UGA	reseauUGA			X			c3	autre	LEAF 332	1	U42	0	X																																																																																										X																													
+UGA	reseauUGA			X			c3	autre	imag-dc-332-sw	1	U40	0		X																																																											X																																																											
+UGA	reseauUGA			X			c3	transfert de charge APC		1	U36	0																																						X																														X																																																				
+UGA	CIMENT					X	c5	switch DELL		1	U38	0																															X																														X																																																											
+UGA	reseauUGA			X			c6	autre	LEAF 333	1	U42	0																																X																													X																																																											
+UGA	reseauUGA			X			c6	switch	imag-dc-333-sw	1	U40	0																															X																																																												X																													
+UGA	reseauUGA			X			d1	autre	LEAF 341	1	U42	0	X																																																												X																																																											
+UGA	reseauUGA			X			d1	switch	imag-dc-341-sw	1	U40	0																															X																																																												X																													
+UGA	SIMSU					X	d1	autre	KVM DGDSI	1	U24	0																																																																																																			X																					
+UGA	SIMSU					X	d1	autre	KVM DGDSI	1	U22	0																																							X																																																												X																					
+UGA	reseauUGA			X			d3	autre	SPINE 301	2	U42	0																															X																														X																																																											
+UGA	reseauUGA			X			d3	autre	SPINE 302	2	U38	0	X																																																																																										X																													
+UGA	reseauUGA			X			d3	autre	LEAF 342	1	U37	0		X																																																																																										X																												
+UGA	reseauUGA			X			d3	autre	imag-dc-342-sw	1	U35	0																																X																														X																																																										
+UGA	reseauUGA			X			d6	autre	LEAF 343	1	U40	0	X																																																																																										X																													
+UGA	reseauUGA			X			d6	switch	imag-dc-343-sw	1	U38	0																															X																														X																																																											
+UGA	reseauUGA			X			e1	autre	LEAF 351	1	U42	0	X																																																																																										X																													
+UGA	reseauUGA			X			e1	autre	imag-dc-351-sw	1	U40	0																															X																														X																																																											
+UGA	reseauUGA			X			e3	autre	LEAF 352	1	U42	0	X																																																																																										X																													
+UGA	reseauUGA			X			e3	switch	imag-dc-352-sw	1	U40	0																															X																														X																																																											
+UGA	reseauUGA			X			e5	autre	LEAF 353	1	U42	0																															X																																																												X																													
+UGA	reseauUGA			X			e5	switch	imag-dc-352-sw	1	U40	0	X																																																												X																																																											
+UGA	LIPHY					X	e6	cisco		1	U42	0	X																																																																																																																							
+UGA	reseauUGA			X			e6	transfert de charge APC		1	U26	0									X																																																																																										X																					
+UGA	reseauUGA			X			f1	autre	LEAF 361	1	U42	0	X																																																																																										X																													
+UGA	reseauUGA			X			f1	autre	imag-dc-361-sw	1	U40	0																															X																														X																																																											
+UGA	reseauUGA			X			f3	autre	LEAF 362	1	U42	0	X																																																																																										X																													
+UGA	reseauUGA			X			f3	autre	imag-dc-362-sw	1	U40	0			X																																																										X																																																											
+COMUE	Inria					X	f3	autre	KVM INRIA	1	U39	0		X																																																												X																																																										
+UGA	reseauUGA			X			f3	transfert de charge APC		1	U23	0								X																																																												X																																																				
+UGA	LEGI					X	f4	switch		1	U31	0																																																																			X																									X																												
+UGA	reseauUGA			X			f5	autre	LEAF 363	1	U42	0																															X																																																																		X																							
+UGA	reseauUGA			X			f5	switch	imag-dc-363-sw	1	U40	0	X																																																																		X																																																					

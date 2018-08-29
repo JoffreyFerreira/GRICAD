@@ -1,22 +1,11 @@
 #!/usr/bin/php
 <?php
 
-$servername = "localhost";
-$username = "admin";
-$password = "admin";
+$dc = "imag";
+include 'ressources.php';
+$conn = init($dc);
 
-// Create connection
-$conn = new mysqli($servername, $username, $password);
-
-// Check connection
-if ($conn->connect_error) {
-	die("Connection failed: " . $conn->connect_error . "\n");
-}
-
-$sql = "USE imag;";
-$conn->query($sql);
-
-$table = array('capacite', 'outlet', 'machine', 'baie', 'projet_equipe', 'rattachement_admin', 'conso_equipe', 'conso_daily', 'conso_weekly');
+$table = array('capacite', 'outlet', 'machine', 'baie', 'projet_equipe', 'rattachement_admin', 'conso_equipe', 'conso_daily', 'conso_weekly', 'ss_categorie', 'baie_hd_equipe', 'mail_equipe');
 
 foreach ($table as $t) {
 	$sql = "DROP TABLE IF EXISTS ".$t;
@@ -54,6 +43,21 @@ if ($conn->query($sql) === TRUE) {
 	echo "Error creating table: " . $conn->error . "\n";
 }
 
+
+// sql to create table projet_equipe
+$sql = "CREATE TABLE mail_equipe(
+nom_projet VARCHAR(30) not null,
+mail VARCHAR(255),
+primary key (nom_projet)
+)";
+
+
+if ($conn->query($sql) === TRUE) {
+	echo "Table projet_equipe created successfully\n";
+} else {
+	echo "Error creating table: " . $conn->error . "\n";
+}
+
 // sql to create table projet_equipe
 $sql = "CREATE TABLE conso_equipe(
 nom_projet VARCHAR(30) not null,
@@ -79,6 +83,20 @@ if ($conn->query($sql) === TRUE) {
 } else {
 	echo "Error creating table: " . $conn->error . "\n";
 }
+
+// sql to create table baie
+$sql = "CREATE TABLE baie_hd_equipe (
+nom_baie VARCHAR(10) not null,
+nom_projet VARCHAR(30),
+primary key (nom_baie)
+)";
+
+if ($conn->query($sql) === TRUE) {
+	echo "Table baie created successfully\n";
+} else {
+	echo "Error creating table: " . $conn->error . "\n";
+}
+
 
 // sql to create table machine
 $sql = "CREATE TABLE machine(
@@ -148,9 +166,8 @@ if ($conn->query($sql) === TRUE) {
 }
 
 // API call
-$res = shell_exec("curl -H 'https://gricad.univ-grenoble-alpes.fr/export_soumissions/webform/07264df1-aacc-4b3a-bcaa-fe462fc6d05a/submission's   ");
+$res = shell_exec("curl -H \"api-key: xxx\" 'https://gricad.univ-grenoble-alpes.fr/export_soumissions/webform/07264df1-aacc-4b3a-bcaa-fe462fc6d05a/submission's   ");
 $tab = json_decode($res);
-
 
 // dc : 31  - rack : 32 - admin : 4 - equipe : 3 - puissance : 13 - nbr U : 12 - modele : 6 - num serie : 9 - type : 5 -  .
 $mesure = array();
@@ -186,7 +203,6 @@ for ($i=0; $i < count($tab); $i++) {
 		} else {
 			echo "Error: " . $sql . " " . $conn->error . "\n";
 		}
-		
 
 		$sql = "INSERT IGNORE INTO rattachement_admin (nom_admin) VALUES ('$admin')";
 		if ($conn->query($sql) === TRUE) {
@@ -233,6 +249,9 @@ for ($i=0; $i < count($tab); $i++) {
 		}
 
 		for ($j=34; $j < 42; $j++) { 
+			if (is_object($tab[$i]->{'data'}->{$j}->{'values'})) {
+				$tab[$i]->{'data'}->{$j}->{'values'} = get_object_vars($tab[$i]->{'data'}->{$j}->{'values'});
+			}
 			$outlet=$tab[$i]->{'data'}->{$j}->{'values'}[0];
 			$pdu = ($j-33)%4 +1;
 			if($outlet!=""){
@@ -250,6 +269,13 @@ for ($i=0; $i < count($tab); $i++) {
 			}
 		}
 	}
+}
+
+foreach ($all_baie as $nom_baie) {
+	$sql = "INSERT INTO baie_hd_equipe(nom_baie) VALUES ('$nom_baie')";
+	$conn->query($sql);
+	$sql = "INSERT INTO baie(nom_baie) VALUES ('$nom_baie')";
+	$conn->query($sql);
 }
 
 
